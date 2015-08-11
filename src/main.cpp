@@ -2,7 +2,14 @@
 #include <QScreen>
 #include <iostream>
 
+#include "window/window.h"
+
 int main(int argc, char **argv){
-    std::cout << "Hello world" << std::endl;
-    return 1;
+    QGuiApplication app(argc, argv);
+
+    Window window;
+    //view.resize(1280,800);
+    window.show();
+
+    return app.exec();
 }
