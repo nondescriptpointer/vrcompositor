@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QString>
 
-Window::Window():frameCount(0),lastTime(QTime::currentTime()){
+Window::Window(){
     QSurfaceFormat format;
     format.setRenderableType(QSurfaceFormat::OpenGL);
     format.setProfile(QSurfaceFormat::CoreProfile);
@@ -11,12 +11,10 @@ Window::Window():frameCount(0),lastTime(QTime::currentTime()){
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
     setFormat(format);
-
-
 }
 
 Window::~Window(){
-    teardownGL();
+    // clear resources
 }
 
 void Window::resizeGL(int width, int height){
@@ -26,23 +24,24 @@ void Window::resizeGL(int width, int height){
 
 void Window::initializeGL(){
     initializeOpenGLFunctions();
-    printContextInformation();
+    #ifdef QT_DEBUG
+        printContextInformation();
+    #endif
     // clear color
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 }
 
 void Window::paintGL(){
-    // measure framerate
-    measureFramerate();
     // clear
     glClear(GL_COLOR_BUFFER_BIT);
 
     // ask for another update
     update();
-}
 
-void Window::teardownGL(){
-    // no data yet
+    // measure framerate
+    #ifdef QT_DEBUG
+        frameCounter.tick();
+    #endif
 }
 
 void Window::printContextInformation(){
@@ -63,17 +62,4 @@ void Window::printContextInformation(){
     #undef CASE
 
     qDebug() << qPrintable(glType) << qPrintable(glVersion) << "(" << qPrintable(glProfile) << ")";
-}
-
-void Window::measureFramerate(){
-    ++frameCount;
-    const QTime currentTime = QTime::currentTime();
-    const int interval = 2500;
-    const int delta = lastTime.msecsTo(currentTime);
-    if(delta > interval){
-        qreal fps = 1000.0 * frameCount / delta;
-        qDebug() << "FPS:" << fps;
-        frameCount = 0;
-        lastTime = currentTime;
-    }
 }

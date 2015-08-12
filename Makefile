@@ -12,10 +12,10 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_GUI_LIB -DQT_CORE_LIB
-CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -isystem /usr/include/qt -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtCore -I. -I/usr/lib/qt/mkspecs/linux-g++
+DEFINES       = -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB
+CFLAGS        = -pipe -O2 -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong --param=ssp-buffer-size=4 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+CXXFLAGS      = -pipe -O2 -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector-strong --param=ssp-buffer-size=4 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
+INCPATH       = -I. -isystem /usr/include/qt -isystem /usr/include/qt/QtGui -isystem /usr/include/qt/QtCore -Itmp -I/usr/lib/qt/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -35,7 +35,7 @@ COMPRESS      = gzip -9f
 DISTNAME      = vrcompositor1.0.0
 DISTDIR = /home/ego/projects/vrcompositor/.tmp/vrcompositor1.0.0
 LINK          = g++
-LFLAGS        = 
+LFLAGS        = -Wl,-O1 -Wl,-O1,--sort-common,--as-needed,-z,relro
 LIBS          = $(SUBLIBS) -lQt5Gui -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
@@ -49,8 +49,10 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = src/window/window.cpp \
-		src/main.cpp moc_window.cpp
+		src/util/framecounter.cpp \
+		src/main.cpp tmp/moc_window.cpp
 OBJECTS       = window.o \
+		framecounter.o \
 		main.o \
 		moc_window.o
 DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
@@ -228,7 +230,9 @@ DIST          = /usr/lib/qt/mkspecs/features/spec_pre.prf \
 		/usr/lib/qt/mkspecs/features/exceptions.prf \
 		/usr/lib/qt/mkspecs/features/yacc.prf \
 		/usr/lib/qt/mkspecs/features/lex.prf \
-		vrcompositor.pro src/window/window.h src/window/window.cpp \
+		vrcompositor.pro src/window/window.h \
+		src/util/framecounter.h src/window/window.cpp \
+		src/util/framecounter.cpp \
 		src/main.cpp
 QMAKE_TARGET  = vrcompositor
 DESTDIR       = #avoid trailing-slash linebreak
@@ -631,8 +635,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents src/window/window.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/window/window.cpp src/main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/window/window.h src/util/framecounter.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/window/window.cpp src/util/framecounter.cpp src/main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -655,11 +659,12 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_window.cpp
+compiler_moc_header_make_all: tmp/moc_window.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_window.cpp
-moc_window.cpp: src/window/window.h
-	/usr/lib/qt/bin/moc $(DEFINES) -I/usr/lib/qt/mkspecs/linux-g++ -I/home/ego/projects/vrcompositor -I/usr/include/qt -I/usr/include/qt/QtGui -I/usr/include/qt/QtCore -I/usr/include/c++/5.1.0 -I/usr/include/c++/5.1.0/x86_64-unknown-linux-gnu -I/usr/include/c++/5.1.0/backward -I/usr/lib/gcc/x86_64-unknown-linux-gnu/5.1.0/include -I/usr/local/include -I/usr/lib/gcc/x86_64-unknown-linux-gnu/5.1.0/include-fixed -I/usr/include src/window/window.h -o moc_window.cpp
+	-$(DEL_FILE) tmp/moc_window.cpp
+tmp/moc_window.cpp: src/util/framecounter.h \
+		src/window/window.h
+	/usr/lib/qt/bin/moc $(DEFINES) -I/usr/lib/qt/mkspecs/linux-g++ -I/home/ego/projects/vrcompositor -I/usr/include/qt -I/usr/include/qt/QtGui -I/usr/include/qt/QtCore -I/usr/include/c++/5.1.0 -I/usr/include/c++/5.1.0/x86_64-unknown-linux-gnu -I/usr/include/c++/5.1.0/backward -I/usr/lib/gcc/x86_64-unknown-linux-gnu/5.1.0/include -I/usr/local/include -I/usr/lib/gcc/x86_64-unknown-linux-gnu/5.1.0/include-fixed -I/usr/include src/window/window.h -o tmp/moc_window.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -673,14 +678,19 @@ compiler_clean: compiler_moc_header_clean
 
 ####### Compile
 
-window.o: src/window/window.cpp src/window/window.h
+window.o: src/window/window.cpp src/window/window.h \
+		src/util/framecounter.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o window.o src/window/window.cpp
 
-main.o: src/main.cpp src/window/window.h
+framecounter.o: src/util/framecounter.cpp src/util/framecounter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o framecounter.o src/util/framecounter.cpp
+
+main.o: src/main.cpp src/window/window.h \
+		src/util/framecounter.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o src/main.cpp
 
-moc_window.o: moc_window.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_window.o moc_window.cpp
+moc_window.o: tmp/moc_window.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_window.o tmp/moc_window.cpp
 
 ####### Install
 
