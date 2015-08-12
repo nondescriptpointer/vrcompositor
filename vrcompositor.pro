@@ -1,5 +1,3 @@
-SET(FRAMERATE TRUE)
-
 MOC_DIR = build/moc
 OBJECTS_DIR = build/object
 

@@ -3,6 +3,7 @@
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
 #include <QRect>
+#include <QOpenGLShaderProgram>
 #ifdef QT_DEBUG
     #include "../util/framecounter.h"
 #endif
@@ -18,6 +19,8 @@ public:
     void paintGL();
 
 private:
+    QOpenGLShaderProgram program;
+
     void printContextInformation();
     #ifdef QT_DEBUG
         FrameCounter frameCounter;

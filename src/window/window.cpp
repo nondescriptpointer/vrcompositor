@@ -27,6 +27,13 @@ void Window::initializeGL(){
     #ifdef QT_DEBUG
         printContextInformation();
     #endif
+    // enable depth testing
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    // create a shader program
+    program.addShaderFromSourceFile(QOpenGLShader::Vertex,"shaders/identity.vp");
+    program.addShaderFromSourceFile(QOpenGLShader::Fragment,"shaders/identity.fp");
+    program.link();
     // clear color
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 }
