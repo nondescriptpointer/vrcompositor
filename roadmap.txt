@@ -1,6 +1,4 @@
-- Migrate the framecounter somewhere else
 - Render something simple
-- Remove the 60FPS framerate limit 
 - Enable anisotropic filtering
 - Enable antialiasing
 - Integrate oculus SDK
