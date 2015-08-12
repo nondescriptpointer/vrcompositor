@@ -20,6 +20,7 @@ Window::~Window(){
 void Window::resizeGL(int width, int height){
     (void)width;
     (void)height;
+    //qDebug() << width << ", " << height;
 }
 
 void Window::initializeGL(){
@@ -40,7 +41,8 @@ void Window::initializeGL(){
 
 void Window::paintGL(){
     // clear
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glViewport(0,0,width(),height());
 
     // ask for another update
     update();

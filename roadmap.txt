@@ -1,4 +1,0 @@
-- Render something simple
-- Enable anisotropic filtering
-- Enable antialiasing
-- Integrate oculus SDK
