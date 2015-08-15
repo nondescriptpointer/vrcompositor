@@ -31,10 +31,29 @@ void Window::initializeGL(){
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    // create a shader program
+    // create a test shader program
     program.addShaderFromSourceFile(QOpenGLShader::Vertex,"shaders/identity.vp");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment,"shaders/identity.fp");
     program.link();
+    // create vertex array object
+    vao = new QOpenGLVertexArrayObject;
+    vao->create();
+    vao->bind();
+    triangle = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    triangle->create();
+    triangle->bind();
+    triangle->setUsagePattern(QOpenGLBuffer::StaticDraw);
+    GLfloat tri[] =
+    {
+        0.0f,1.0f,-1.0f,1.0f,
+         1.0f,1.0f,-1.0f,1.0f,
+         1.0f,0.0f,-1.0f,1.0f,
+
+    };
+    triangle->allocate(tri,sizeof(tri));
+    // configure shader
+    program.enableAttributeArray(0);
+    program.setAttributeBuffer(0,GL_FLOAT,0,4,0);
     // clear color
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 }
@@ -43,6 +62,12 @@ void Window::paintGL(){
     // clear
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glViewport(0,0,width(),height());
+
+    // draw
+    program.bind();
+    program.setUniformValue("vColor",QColor(255,255,255));
+    vao->bind();
+    glDrawArrays(GL_TRIANGLES,0,3);
 
     // ask for another update
     update();

@@ -4,6 +4,8 @@
 #include <QOpenGLFunctions>
 #include <QRect>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 #ifdef QT_DEBUG
     #include "../util/framecounter.h"
 #endif
@@ -20,6 +22,8 @@ public:
 
 private:
     QOpenGLShaderProgram program;
+    QOpenGLVertexArrayObject *vao;
+    QOpenGLBuffer *triangle;
 
     void printContextInformation();
     #ifdef QT_DEBUG
