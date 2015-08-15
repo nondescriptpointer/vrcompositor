@@ -35,7 +35,13 @@ void Window::initializeGL(){
     glewInit();
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    // enable culling
+    /*glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);*/
+    // blend mode
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // enable antialiasing
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_LINE_SMOOTH);
@@ -45,13 +51,15 @@ void Window::initializeGL(){
     program.link();
     // create a texture manager
     textureManager = new gliby::TextureManager();
-    const char* textures[] = {"textures/assets/1.png"};
+    const char* textures[] = {"assets/textures/1.png"};
     textureManager->loadTextures(sizeof(textures)/sizeof(char*),textures,GL_TEXTURE_2D,GL_TEXTURE0);
     // create plane geometry
     quad = gliby::GeometryFactory::plane(1.0f,1.0f,0.0f,0.0f,0.0f);
-    plane = new gliby::Actor(&quad,textureManager->get("textures/assets/1.png"));
+    plane = new gliby::Actor(&quad,textureManager->get("assets/textures/1.png"));
     // configure shader
-    program.enableAttributeArray(0);
+    //program.enableAttributeArray(0);
+    program.bindAttributeLocation("vVertex",0);
+    program.bindAttributeLocation("vTexCoord",3);
     program.setAttributeBuffer(0,GL_FLOAT,0,4,0);
     // clear color
     glClearColor(0.0f,0.0f,0.0f,1.0f);
@@ -59,12 +67,18 @@ void Window::initializeGL(){
 
 void Window::paintGL(){
     // clear
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     glViewport(0,0,width(),height());
 
     // bind shader
     program.bind();
-    program.setUniformValue("vColor",QColor(255,255,255));
+    //program.setUniformValue("vColor",QColor(255,255,255));
+
+    // bind the texture
+    glBindTexture(GL_TEXTURE_2D,plane->getTexture());
+
+    // set the texture uniform
+    program.setUniformValue("textureUnit",0);
 
     // draw plane
     plane->getGeometry().draw();
