@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QString>
+#include "GeometryFactory.h"
 
 Window::Window(){
     QSurfaceFormat format;
@@ -25,10 +26,13 @@ void Window::resizeGL(int width, int height){
 }
 
 void Window::initializeGL(){
-    initializeOpenGLFunctions();
+    //initializeOpenGLFunctions();
     #ifdef QT_DEBUG
         printContextInformation();
     #endif
+    // init glew
+    glewExperimental = GL_TRUE;
+    glewInit();
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -39,21 +43,13 @@ void Window::initializeGL(){
     program.addShaderFromSourceFile(QOpenGLShader::Vertex,"shaders/identity.vp");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment,"shaders/identity.fp");
     program.link();
-    // create vertex array object
-    vao = new QOpenGLVertexArrayObject;
-    vao->create();
-    vao->bind();
-    triangle = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    triangle->create();
-    triangle->bind();
-    triangle->setUsagePattern(QOpenGLBuffer::StaticDraw);
-    GLfloat tri[] =
-    {
-        0.0f,1.0f,-1.0f,1.0f,
-         1.0f,1.0f,-1.0f,1.0f,
-         1.0f,0.0f,-1.0f,1.0f,
-    };
-    triangle->allocate(tri,sizeof(tri));
+    // create a texture manager
+    textureManager = new gliby::TextureManager();
+    const char* textures[] = {"textures/assets/1.png"};
+    textureManager->loadTextures(sizeof(textures)/sizeof(char*),textures,GL_TEXTURE_2D,GL_TEXTURE0);
+    // create plane geometry
+    quad = gliby::GeometryFactory::plane(1.0f,1.0f,0.0f,0.0f,0.0f);
+    plane = new gliby::Actor(&quad,textureManager->get("textures/assets/1.png"));
     // configure shader
     program.enableAttributeArray(0);
     program.setAttributeBuffer(0,GL_FLOAT,0,4,0);
@@ -66,11 +62,12 @@ void Window::paintGL(){
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glViewport(0,0,width(),height());
 
-    // draw
+    // bind shader
     program.bind();
     program.setUniformValue("vColor",QColor(255,255,255));
-    vao->bind();
-    glDrawArrays(GL_TRIANGLES,0,3);
+
+    // draw plane
+    plane->getGeometry().draw();
 
     // ask for another update
     update();

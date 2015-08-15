@@ -1,7 +1,5 @@
 Short term
 ==========
-- Enable antialiasing
-- Render a quad instead
 - Apply texture
 - Setup perspective projection
 - Rotate the quad

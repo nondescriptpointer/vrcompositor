@@ -1,16 +1,17 @@
 #pragma once
 
+#include <GL/glew.h>
 #include <QOpenGLWindow>
-#include <QOpenGLFunctions>
 #include <QRect>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLVertexArrayObject>
-#include <QOpenGLBuffer>
 #ifdef QT_DEBUG
     #include "../util/framecounter.h"
 #endif
+#include "Batch.h"
+#include "Actor.h"
+#include "TextureManager.h"
 
-class Window : public QOpenGLWindow, protected QOpenGLFunctions {
+class Window : public QOpenGLWindow {
     Q_OBJECT
 
 public:
@@ -22,8 +23,9 @@ public:
 
 private:
     QOpenGLShaderProgram program;
-    QOpenGLVertexArrayObject *vao;
-    QOpenGLBuffer *triangle;
+    gliby::Batch quad;
+    gliby::Actor* plane;
+    gliby::TextureManager* textureManager;
 
     void printContextInformation();
     #ifdef QT_DEBUG

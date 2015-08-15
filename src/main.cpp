@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <QGuiApplication>
 #include <QScreen>
 #include <iostream>
@@ -5,6 +6,7 @@
 #include "window/window.h"
 
 int main(int argc, char **argv){
+
     QGuiApplication app(argc, argv);
 
     Window window;

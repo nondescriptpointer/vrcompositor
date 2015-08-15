@@ -7,7 +7,8 @@ CONFIG += debug
 
 QMAKE_CXXFLAGS += -O3 -march=native -std=c++0x
 
-LIBS += -lassimp -lfreeimage -lGLEW -lboost_system -lboost_filesystem
+LIBS += -lassimp -lfreeimage -lGL -lGLU -lGLEW -lboost_system -lboost_filesystem
+QT += opengl
 
 INCLUDEPATH += $$GLIBY_DIR/include
 HEADERS += $$GLIBY_DIR/include/Actor.h $$GLIBY_DIR/include/Batch.h $$GLIBY_DIR/include/Frame.h $$GLIBY_DIR/include/Frustum.h $$GLIBY_DIR/include/GeometryFactory.h $$GLIBY_DIR/include/Math3D.h $$GLIBY_DIR/include/MatrixStack.h $$GLIBY_DIR/include/ModelLoader.h $$GLIBY_DIR/include/ShaderManager.h $$GLIBY_DIR/include/TextureManager.h $$GLIBY_DIR/include/Grid.h $$GLIBY_DIR/include/TransformPipeline.h $$GLIBY_DIR/include/TriangleBatch.h $$GLIBY_DIR/include/UniformManager.h
