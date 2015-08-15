@@ -10,6 +10,7 @@ Window::Window(){
     format.setVersion(4,5);
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
+    format.setSamples(16);
     setFormat(format);
 }
 
@@ -31,6 +32,9 @@ void Window::initializeGL(){
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    // enable antialiasing
+    glEnable(GL_MULTISAMPLE);
+    glEnable(GL_LINE_SMOOTH);
     // create a test shader program
     program.addShaderFromSourceFile(QOpenGLShader::Vertex,"shaders/identity.vp");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment,"shaders/identity.fp");
@@ -48,7 +52,6 @@ void Window::initializeGL(){
         0.0f,1.0f,-1.0f,1.0f,
          1.0f,1.0f,-1.0f,1.0f,
          1.0f,0.0f,-1.0f,1.0f,
-
     };
     triangle->allocate(tri,sizeof(tri));
     // configure shader
