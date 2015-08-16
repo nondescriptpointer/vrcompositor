@@ -3,9 +3,11 @@
 in vec4 vVertex;
 in vec2 vTexCoord;
 
+uniform mat4 mvpMatrix;
+
 smooth out vec2 vTex;
 
 void main(void){
     vTex = vTexCoord;
-    gl_Position = vVertex;
+    gl_Position = mvpMatrix * vVertex;
 }

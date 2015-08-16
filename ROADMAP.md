@@ -1,6 +1,5 @@
 Short term
 ==========
-- Apply texture
 - Setup perspective projection
 - Rotate the quad
 - Enable anisotropic filtering

@@ -10,6 +10,10 @@
 #include "Batch.h"
 #include "Actor.h"
 #include "TextureManager.h"
+#include "TransformPipeline.h"
+#include "MatrixStack.h"
+#include "Frustum.h"
+#include "Frame.h"
 
 class Window : public QOpenGLWindow {
     Q_OBJECT
@@ -23,9 +27,16 @@ public:
 
 private:
     QOpenGLShaderProgram program;
+    gliby::TextureManager* textureManager;
+    gliby::TransformPipeline transformPipeline;
+    gliby::MatrixStack modelViewMatrix;
+    gliby::MatrixStack projectionMatrix;
+    gliby::Frame cameraFrame;
+    gliby::Frustum viewFrustum;
+
     gliby::Batch quad;
     gliby::Actor* plane;
-    gliby::TextureManager* textureManager;
+    
 
     void printContextInformation();
     #ifdef QT_DEBUG

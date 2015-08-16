@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QString>
 #include "GeometryFactory.h"
+#include "Math3D.h"
 
 Window::Window(){
     QSurfaceFormat format;
@@ -20,9 +21,11 @@ Window::~Window(){
 }
 
 void Window::resizeGL(int width, int height){
-    (void)width;
-    (void)height;
-    //qDebug() << width << ", " << height;
+    // change gl viewport size
+    glViewport(0,0,width,height);
+    // reset the frustum and projection matrix
+    viewFrustum.setPerspective(45.0f, float(width)/float(height),0.1f,5000.0f);
+    projectionMatrix.loadMatrix(viewFrustum.getProjectionMatrix());
 }
 
 void Window::initializeGL(){
@@ -35,6 +38,7 @@ void Window::initializeGL(){
     glewInit();
     // enable depth testing
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DITHER);
     // enable culling
     /*glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -45,7 +49,7 @@ void Window::initializeGL(){
     // enable antialiasing
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_LINE_SMOOTH);
-    // create a test shader program
+    // a create test shader program
     program.addShaderFromSourceFile(QOpenGLShader::Vertex,"shaders/identity.vp");
     program.addShaderFromSourceFile(QOpenGLShader::Fragment,"shaders/identity.fp");
     program.link();
@@ -63,28 +67,44 @@ void Window::initializeGL(){
     program.setAttributeBuffer(0,GL_FLOAT,0,4,0);
     // clear color
     glClearColor(0.0f,0.0f,0.0f,1.0f);
+    // setup viewport
+    glViewport(0,0,width(),height());
+    // setup transform pipeline
+    transformPipeline.setMatrixStacks(modelViewMatrix,projectionMatrix);
+    viewFrustum.setPerspective(35.0f, float(width())/float(height()), 1.0f, 5000.0f);
+    projectionMatrix.loadMatrix(viewFrustum.getProjectionMatrix());
+    modelViewMatrix.loadIdentity();
+    // setup camera
+    cameraFrame.setOrigin(0.0f,1.0f,0.0f);
+    cameraFrame.lookAt(0.0f,0.0f,0.0f);
 }
 
 void Window::paintGL(){
     // clear
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-    glViewport(0,0,width(),height());
+
+    // setup model view matrix to use the camera
+    Math3D::Matrix44f mCamera;
+    cameraFrame.getCameraMatrix(mCamera);
+    modelViewMatrix.pushMatrix();
+    modelViewMatrix.multMatrix(mCamera);
 
     // bind shader
     program.bind();
-    //program.setUniformValue("vColor",QColor(255,255,255));
 
     // bind the texture
     glBindTexture(GL_TEXTURE_2D,plane->getTexture());
-
     // set the texture uniform
     program.setUniformValue("textureUnit",0);
-
+    program.setUniformValue("mvpMatrix",*transformPipeline.getModelViewProjectionMatrix());
     // draw plane
     plane->getGeometry().draw();
 
     // ask for another update
     update();
+
+    // reset model view matrix
+    modelViewMatrix.popMatrix();
 
     // measure framerate
     #ifdef QT_DEBUG
