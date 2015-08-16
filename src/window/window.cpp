@@ -88,6 +88,12 @@ void Window::paintGL(){
     modelViewMatrix.pushMatrix();
     modelViewMatrix.multMatrix(mCamera);
 
+    plane->getFrame().rotateLocalY(0.01f);
+    modelViewMatrix.pushMatrix();
+    Math3D::Matrix44f mObject;
+    plane->getFrame().getMatrix(mObject);
+    modelViewMatrix.multMatrix(mObject);
+
     // bind shader
     glUseProgram(shader);
 
@@ -102,11 +108,12 @@ void Window::paintGL(){
     // draw plane
     plane->getGeometry().draw();
 
-    // ask for another update
-    update();
-
     // reset model view matrix
     modelViewMatrix.popMatrix();
+    modelViewMatrix.popMatrix();
+
+    // ask for another update
+    update();
 
     // measure framerate
     #ifdef QT_DEBUG

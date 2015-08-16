@@ -1,7 +1,7 @@
 Short term
 ==========
 - Rotate the quad
-- Enable anisotropic filtering
+- Enable/check anisotropic filtering
 - Textured 3D model and textured plane
 - Integrate oculus SDK
 
