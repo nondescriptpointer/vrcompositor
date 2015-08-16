@@ -1,6 +1,6 @@
 #version 450
 
-//precision mediump float;
+precision mediump float;
 
 uniform sampler2D textureUnit;
 smooth in vec2 vTex;

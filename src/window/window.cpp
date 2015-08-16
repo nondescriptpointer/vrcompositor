@@ -24,7 +24,7 @@ void Window::resizeGL(int width, int height){
     // change gl viewport size
     glViewport(0,0,width,height);
     // reset the frustum and projection matrix
-    viewFrustum.setPerspective(45.0f, float(width)/float(height),0.1f,5000.0f);
+    viewFrustum.setPerspective(45.0f, float(width)/float(height),0.1f,500.0f);
     projectionMatrix.loadMatrix(viewFrustum.getProjectionMatrix());
 }
 
@@ -49,10 +49,13 @@ void Window::initializeGL(){
     // enable antialiasing
     glEnable(GL_MULTISAMPLE);
     glEnable(GL_LINE_SMOOTH);
-    // a create test shader program
-    program.addShaderFromSourceFile(QOpenGLShader::Vertex,"shaders/identity.vp");
-    program.addShaderFromSourceFile(QOpenGLShader::Fragment,"shaders/identity.fp");
-    program.link();
+    // create test shader program
+    const char* searchPath[] = {"./shaders/","/home/ego/projects/personal/gliby/shaders/"};
+    shaderManager = new gliby::ShaderManager(sizeof(searchPath)/sizeof(char*),searchPath);
+    gliby::ShaderAttribute attrs[] = {{0,"vVertex"},{2,"vNormal"},{3,"vTexCoord"}};
+    shader = shaderManager->buildShaderPair("windowshader.vp","windowshader.fp",sizeof(attrs)/sizeof(gliby::ShaderAttribute),attrs);
+    const char* uniforms[] = {"mvpMatrix","textureUnit"};
+    uniformManager = new gliby::UniformManager(shader,sizeof(uniforms)/sizeof(char*),uniforms);
     // create a texture manager
     textureManager = new gliby::TextureManager();
     const char* textures[] = {"assets/textures/1.png"};
@@ -60,23 +63,19 @@ void Window::initializeGL(){
     // create plane geometry
     quad = gliby::GeometryFactory::plane(1.0f,1.0f,0.0f,0.0f,0.0f);
     plane = new gliby::Actor(&quad,textureManager->get("assets/textures/1.png"));
-    // configure shader
-    //program.enableAttributeArray(0);
-    program.bindAttributeLocation("vVertex",0);
-    program.bindAttributeLocation("vTexCoord",3);
-    program.setAttributeBuffer(0,GL_FLOAT,0,4,0);
     // clear color
     glClearColor(0.0f,0.0f,0.0f,1.0f);
     // setup viewport
     glViewport(0,0,width(),height());
     // setup transform pipeline
     transformPipeline.setMatrixStacks(modelViewMatrix,projectionMatrix);
-    viewFrustum.setPerspective(35.0f, float(width())/float(height()), 1.0f, 5000.0f);
+    viewFrustum.setPerspective(35.0f, float(width())/float(height()), 1.0f, 500.0f);
     projectionMatrix.loadMatrix(viewFrustum.getProjectionMatrix());
     modelViewMatrix.loadIdentity();
     // setup camera
-    cameraFrame.setOrigin(0.0f,1.0f,0.0f);
-    cameraFrame.lookAt(0.0f,0.0f,0.0f);
+    cameraFrame.moveForward(-3.0f);
+    /*cameraFrame.setOrigin(50.0f,50.0f,0.0f);
+    cameraFrame.lookAt(0.0f,0.0f,0.0f);*/
 }
 
 void Window::paintGL(){
@@ -90,13 +89,16 @@ void Window::paintGL(){
     modelViewMatrix.multMatrix(mCamera);
 
     // bind shader
-    program.bind();
+    glUseProgram(shader);
 
     // bind the texture
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,plane->getTexture());
-    // set the texture uniform
-    program.setUniformValue("textureUnit",0);
-    program.setUniformValue("mvpMatrix",*transformPipeline.getModelViewProjectionMatrix());
+    // set the texture uniform0
+    glUniform1i(uniformManager->get("textureUnit"),0);
+    // set transformation matrix
+    glUniformMatrix4fv(uniformManager->get("mvpMatrix"),1,GL_FALSE,transformPipeline.getModelViewProjectionMatrix());
+
     // draw plane
     plane->getGeometry().draw();
 

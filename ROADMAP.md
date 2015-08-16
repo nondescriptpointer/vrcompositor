@@ -1,6 +1,5 @@
 Short term
 ==========
-- Setup perspective projection
 - Rotate the quad
 - Enable anisotropic filtering
 - Textured 3D model and textured plane

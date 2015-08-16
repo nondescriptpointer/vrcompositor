@@ -3,7 +3,6 @@
 #include <GL/glew.h>
 #include <QOpenGLWindow>
 #include <QRect>
-#include <QOpenGLShaderProgram>
 #ifdef QT_DEBUG
     #include "../util/framecounter.h"
 #endif
@@ -14,6 +13,8 @@
 #include "MatrixStack.h"
 #include "Frustum.h"
 #include "Frame.h"
+#include "ShaderManager.h"
+#include "UniformManager.h"
 
 class Window : public QOpenGLWindow {
     Q_OBJECT
@@ -26,14 +27,19 @@ public:
     void paintGL();
 
 private:
-    QOpenGLShaderProgram program;
+    // shader
+    gliby::ShaderManager* shaderManager;
+    gliby::UniformManager* uniformManager;
+    GLuint shader;
+    // texture
     gliby::TextureManager* textureManager;
+    // transforms
     gliby::TransformPipeline transformPipeline;
     gliby::MatrixStack modelViewMatrix;
     gliby::MatrixStack projectionMatrix;
     gliby::Frame cameraFrame;
     gliby::Frustum viewFrustum;
-
+    // objs
     gliby::Batch quad;
     gliby::Actor* plane;
     
