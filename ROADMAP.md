@@ -1,9 +1,9 @@
 Short term
 ==========
-- Rotate the quad
-- Enable/check anisotropic filtering
-- Textured 3D model and textured plane
+- Load a 3D model and display it
 - Integrate oculus SDK
+- Possibly switch to GLFW due to lack of control over OpenGL initialization
+- Start implementation of the compositor
 
 Long term
 =========

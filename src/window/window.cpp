@@ -5,6 +5,8 @@
 #include "GeometryFactory.h"
 #include "Math3D.h"
 
+#include <iostream>
+
 Window::Window(){
     QSurfaceFormat format;
     format.setRenderableType(QSurfaceFormat::OpenGL);
@@ -14,6 +16,8 @@ Window::Window(){
     format.setStencilBufferSize(8);
     format.setSamples(16);
     setFormat(format);
+    // create hmd
+    hmd = new OculusHMD(winId());
 }
 
 Window::~Window(){

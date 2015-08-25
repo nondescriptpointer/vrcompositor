@@ -15,6 +15,7 @@
 #include "Frame.h"
 #include "ShaderManager.h"
 #include "UniformManager.h"
+#include "../device/oculushmd.h"
 
 class Window : public QOpenGLWindow {
     Q_OBJECT
@@ -42,7 +43,8 @@ private:
     // objs
     gliby::Batch quad;
     gliby::Actor* plane;
-    
+    // oculus
+    OculusHMD* hmd;
 
     void printContextInformation();
     #ifdef QT_DEBUG
